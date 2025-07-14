@@ -1,4 +1,3 @@
-```markdown
 # 🚘 Vehicle Service Management System
 
 A full-stack Node.js web application for managing vehicle services with features like **vehicle bookings** and **service reminders**. Built with **MongoDB**, **Express**, and **EJS**, and styled using custom CSS (no Bootstrap).
@@ -110,5 +109,3 @@ This project is licensed under the [MIT License](LICENSE).
 
 Developed by **Sai Sravani Gunda**
 🔗 GitHub: [@SaiSravaniGunda](https://github.com/SaiSravaniGunda)
-
-```
