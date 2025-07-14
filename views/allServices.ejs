@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('./partials/head')%>
+    <title>ServiTrack</title>
+    <!-- Add Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LAav8qGOHp/lWYWq5jpn5qIAWP/p5rj8tAHy4tNqpyIWjpAmM4vjWpL2iZ8QLKgA" crossorigin="anonymous">
+
+    <style>
+        /* Sidebar style */
+        
+        
+        .sidebar {
+            height: 100vh; /* Full height */
+            width: 250px; /* Fixed width */
+            position: fixed; /* Make sidebar fixed on the left */
+            top: 0;
+            left: 0;
+            background-color: #45494e; /* Dark background */
+            padding-top: 20px; /* Space at the top */
+        }
+
+        .sidebar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+        }
+
+        .sidebar a:hover {
+            background-color: #7d7f81;
+        }
+
+        /* Main content */
+        .main-content {
+            margin-left: 250px; /* Same as the width of the sidebar */
+            padding: 20px;
+        }
+
+        /* Fixed navbar */
+        .navbar {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* Adjust the main content padding due to fixed navbar */
+        .main-content {
+            padding-top: 60px;
+        }
+        .service-card {
+            border: 2px solid transparent; /* Default border color */
+        }
+        .reminder-set {
+            border-color: blue; /* Border color for reminder set */
+        }
+        .service-completed {
+            border-color: green; /* Border color for service completed */
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #28a745; /* Green background */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none; /* Hidden by default */
+            z-index: 1000; /* Ensure it's on top of other content */
+            animation: fadeIn 0.5s, fadeOut 0.5s 2s; /* Animation for showing and hiding */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative; /* Change to relative on small screens */
+                height: auto; /* Allow sidebar to collapse */
+                width: 100%; /* Full width */
+                display: block; /* Ensure it displays */
+            }
+
+            .main-content {
+                margin-left: 0; /* Remove left margin on small screens */
+                padding: 20px; /* Keep padding */
+            }
+
+            .navbar {
+                position: relative; /* Change navbar to relative on small screens */
+            }
+            #emptyLink {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <%- include('./partials/nav')%>
+
+    <div class="sidebar">
+        <a id="emptyLink"></a>
+        <a href="/service/services">Services</a>
+        <a href="/service/book">Book a service</a>
+        <a href="/service/serviceHistory">Service History</a>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        <h2>Your Services</h2>
+        <p>Because Every Service Counts for Your Vehicle’s Future</p>
+
+        <!-- Content that will change when navigating between pages -->
+        <div id="pageContent">
+            <% services.forEach(service => { %>
+            <% if (!service.isCompleted) { %>
+                <div class="container mt-5">
+                    <div class="row">
+                        
+                        <div class="col-md-4">
+                            <div class="card text-bg-light mb-3 service-card">
+                                <div class="card-header"><%= service.serviceType %></div>
+                                <div class="card-body">
+                                    <h5 class="card-title">Vehicle: <%= service.vehicle ? service.vehicle.model : 'No Vehicle Info' %></h5>
+
+                                            <h5 class="card-title">
+                                                <%= new Date(service.serviceDate).toLocaleDateString('en-US', {
+                                                    weekday: 'short', // 'Fri'
+                                                    year: 'numeric',  // '2024'
+                                                    month: 'short',   // 'Oct'
+                                                    day: 'numeric'    // '18'
+                                                }) %>
+                                            </h5>
+                                            <% if (service.reminderDate) { %>
+                                                <p><strong>Reminder Set for:</strong> <%= new Date(service.reminderDate).toLocaleDateString() %></p>
+                                            <% }else{ %>
+                
+                                                <form action="/service/services/setReminder" method="post">
+                                                    <input type="hidden" name="serviceId" value="<%= service._id %>">
+                                                    <label for="reminderDate">Set Reminder:</label>
+                                                    <input type="date" name="reminderDate" required>
+                                                    <button type="submit" class="btn btn-primary btn-sm mt-3">Set Reminder</button>
+                                                </form>
+                                            <% } %>
+                                               
+                                            <form action="/service/services/isDone" method="post">
+                                                <input type="hidden" name="serviceId" value="<%= service._id %>">
+                                                <button type="submit" class="btn btn-primary btn-sm mt-3 service-done">Service Done</button>
+                                            </form>
+                                    </div>
+                                </div>
+                            </div>
+                       
+                    </div>
+                </div>
+                
+            </div>
+            <% } %>
+            <% }) %>
+            
+    </div>
+    <div class="notification" id="notification">Service marked as done!</div>
+    <script>
+        // Attach event listeners after the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Select all buttons
+            const reminderButtons = document.querySelectorAll('.set-reminder');
+            const doneButtons = document.querySelectorAll('.service-done');
+            const notification = document.getElementById('notification');
+
+            // Add click event to reminder buttons
+            reminderButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const card = this.closest('.service-card'); // Get the parent card
+                    card.classList.add('reminder-set'); // Add class for blue border
+                    card.classList.remove('service-completed'); // Ensure green border is removed
+                });
+            });
+
+            // Add click event to done buttons
+            doneButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const card = this.closest('.service-card'); // Get the parent card
+                    card.classList.add('service-completed'); // Add class for green border
+                    card.classList.remove('reminder-set'); // Ensure blue border is removed
+
+                    // Show notification
+                    notification.style.display = 'block'; // Show the notification
+                    setTimeout(() => {
+                        notification.style.display = 'none'; // Hide the notification after 3 seconds
+                    }, 3000);
+                });
+            });
+        });
+    </script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

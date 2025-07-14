@@ -1,0 +1,11 @@
+<!-- verify.ejs -->
+<h2>Verify your email</h2>
+<% if (locals.error) { %>
+  <p style="color: red;"><%= error %></p>
+<% } %>
+<form action="/user/verify" method="POST">
+  <input type="hidden" name="email" value="<%= email %>">
+  <label for="code">Enter the verification code sent to your email:</label>
+  <input type="text" name="verificationCode" id="code" required>
+  <button type="submit">Verify</button>
+</form>

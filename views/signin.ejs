@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('./partials/head')%>
+    <style>
+        /* Adjust the body to account for fixed navbar */
+        body {
+            padding-top: 60px; /* Adjust this value according to your navbar height */
+        }
+    </style>
+    <title>ServiTrack</title>
+</head>
+<body>
+    <%- include('./partials/nav')%>
+    <% if (locals.error) { %>
+        <div id="errorDiv" class="alert alert-danger mt-3 "  role="alert">
+            <%= locals.error%>
+        </div>
+    <% } %>
+    <div class="container mt-4">
+        <form action="/user/signin" method="post">
+            
+            <div class="mb-3">
+              <label for="exampleInputEmail1" class="form-label">Email address</label>
+              <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="email">
+              <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+            </div>
+            <div class="mb-3">
+              <label for="exampleInputPassword1" class="form-label">Password</label>
+              <input type="password" name="password"class="form-control" id="exampleInputPassword1">
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+    </div>
+    <script>
+        // Hide the error message after 5 seconds
+        setTimeout(function() {
+            const errorDiv = document.getElementById('errorDiv');
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+            }
+        }, 5000);
+    </script>
+    <%- include('./partials/script')%>
+</body>
+</html>
